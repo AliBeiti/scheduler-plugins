@@ -39,6 +39,8 @@ import (
 	"sigs.k8s.io/scheduler-plugins/pkg/trimaran/peaks"
 	"sigs.k8s.io/scheduler-plugins/pkg/trimaran/targetloadpacking"
 
+	"sigs.k8s.io/scheduler-plugins/pkg/controllerscore"
+
 	// Ensure scheme package is initialized.
 	_ "sigs.k8s.io/scheduler-plugins/apis/config/scheme"
 )
@@ -60,6 +62,7 @@ func main() {
 		app.WithPlugin(lowriskovercommitment.Name, lowriskovercommitment.New),
 		app.WithPlugin(sysched.Name, sysched.New),
 		app.WithPlugin(peaks.Name, peaks.New),
+		app.WithPlugin(controllerscore.PluginName, controllerscore.NewControllerScorePlugin),
 		// Sample plugins below.
 		// app.WithPlugin(crossnodepreemption.Name, crossnodepreemption.New),
 		app.WithPlugin(podstate.Name, podstate.New),
