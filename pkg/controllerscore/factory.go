@@ -1,23 +1,28 @@
 package controllerscore
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
-	v1 "k8s.io/pkg/scheduler/framework/v1alhpa1"
 )
 
 func NewControllerScorePlugin(
-	obj runtime.Unknown,
+	ctx context.Context,
+	obj runtime.Object,
 	handle framework.Handle,
-	_ v1.PluginConfig,
 ) (framework.Plugin, error) {
 	args := &ControllerScoreArgs{}
-	if len(obj.Raw) > 0 {
-		if err := json.Unmarshal(obj.Raw, args); err != nil {
-			return nil, fmt.Errorf("ControllerScore: failed to decode args: %w", err)
+
+	if obj != nil {
+		rawJSON, err := json.Marshal(obj)
+		if err != nil {
+			return nil, fmt.Errorf("controllerscore: failed to marshal config obj: %w", err)
+		}
+		if err := json.Unmarshal(rawJSON, args); err != nil {
+			return nil, fmt.Errorf("controllerscore: failed to unmarshal controllerscoreargs: %w", err)
 		}
 	}
 	return newControllerScore(args, handle)
