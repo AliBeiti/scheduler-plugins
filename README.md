@@ -121,7 +121,7 @@ Participation in the Kubernetes community is governed by the [Kubernetes Code of
 
  ## UPDATE 12/06/2025
 
-1. A new custom plugin has been created called customScore. For using the plugin an image of the scheduler must be build. 
+1. A new custom plugin has been created called controllerScire. For using the plugin an image of the scheduler must be build. 
 ```shell
 make build
 
@@ -131,7 +131,7 @@ docker build \
   -t myregistry.io/kube-scheduler-controller-score:latest \
   .
 ```
-2. change the deployment file from manifests/controllerscore/deplyment according to the image.
+2. change the deployment file from manifests/controllerscore/deplyment.yaml according to the image.
 
 
 3. Bulding the scheduler's serviceaccount to cluster-admin:
