@@ -119,7 +119,7 @@ You can find an [instruction how to build and run out-of-tree plugin here](doc/d
 Participation in the Kubernetes community is governed by the [Kubernetes Code of Conduct](code-of-conduct.md).
 
 
-UPDATE 12/06/2025
+ ## UPDATE 12/06/2025
 
 1. A new custom plugin has been created called customScore. For using the plugin an image of the scheduler must be build. 
 ```shell
@@ -156,5 +156,11 @@ kubectl -n kube-system create configmap controller-score-scheduler-config \
 ```shell
 kubectl apply -f manifests/controllerscore/deployment.yaml
 ```
+*****
+It should be noted that scheduler communicates over port 6000 for getting HTTP communication for fetching the score. all of the worker nodes must have a controller that produces the scores.
 
 
+The files related to this custom plugin can be found in 
+pkg/controllerscore
+manifests/controllerscore
+cmd/scheduler/main.go
