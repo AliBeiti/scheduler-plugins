@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-scheduler-pod
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: test-scheduler-pod
+  template:
+    metadata:
+      labels:
+        app: test-scheduler-pod
+    spec:
+      schedulerName: controller-score-scheduler
+      containers:
+        - name: nginx
+          image: nginx
+      resources:
+        limits:
+          memory: "64Mi"
+          cpu: "50m"

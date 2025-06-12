@@ -2,27 +2,26 @@ apiVersion: kubescheduler.config.k8s.io/v1
 kind: KubeSchedulerConfiguration
 
 
-clientConnection:
-  kubeconfig: "/etc/kubernetes/scheduler.conf"
+#clientConnection:
+#  kubeconfig: "/etc/kubernetes/scheduler.conf"
 
 # 2) Leader election settings so only 1 scheduler is active.
 leaderElection:
-  resourceName: "controller-score-scheduler-lock"
   leaderElect: true
+  resourceName: "controller-score-scheduler-lock"
   leaseDuration: 15s
   renewDeadline: 10s
   retryPeriod: 2s
 
-# 3) Profiles: here we override the default plugins entirely,
-#    making a scheduler whose name is "controller-score-scheduler"
 profiles:
   - schedulerName: controller-score-scheduler
 
-    # 3a) Plugins: disable all built-in filtering/scoring,
-    #     then enable only ControllerScore.
+    #Plugins: disable all built-in filtering/scoring,
+    #hen enable only ControllerScore.
     plugins:
       filter:
         enabled:
+          - name: "TaintToleration"
           - name: "ControllerScore"
         disabled:
           - name: "*"
@@ -33,7 +32,7 @@ profiles:
         disabled:
           - name: "*"
 
-    # 3b) pluginConfig: pass our custom args to ControllerScore
+    #pluginConfig: pass custom args to ControllerScore
     pluginConfig:
       - name: "ControllerScore"
         args:

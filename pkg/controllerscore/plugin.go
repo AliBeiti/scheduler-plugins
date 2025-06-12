@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"time"
 
+	"k8s.io/klog/v2"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 )
@@ -52,17 +54,19 @@ func getInternalIP(node *v1.Node) string {
 
 func (cs *ControllerScore) fetchControllerScore(nodeIP string) (float64, error) {
 	url := fmt.Sprintf("http://%s:%d%s", nodeIP, cs.port, cs.path)
-
+	klog.V(3).Infof("ControllerScore: GET %s", url)
 	ctx, cancel := context.WithTimeout(context.Background(), cs.timeout)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
+		klog.Errorf("ControllerScore: building request for %s: %v", url, err)
 		return 0, err
 	}
 
 	resp, err := cs.httpClient.Do(req)
 	if err != nil {
+		klog.Errorf("ControllerScore: HTTP get %s failed: %v", url, err)
 		return 0, err
 	}
 
@@ -76,9 +80,10 @@ func (cs *ControllerScore) fetchControllerScore(nodeIP string) (float64, error) 
 		Score float64 `json:"score"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+		klog.Errorf("ControllerScore: decoding response from %s: %v", url, err)
 		return 0, err
 	}
-
+	klog.V(3).Infof("ControllerScore: node %s returned raw score %f", nodeIP, payload.Score)
 	return payload.Score, nil
 
 }
@@ -90,6 +95,7 @@ func (cs *ControllerScore) Filter(
 	nodeInfo *framework.NodeInfo,
 ) *framework.Status {
 	node := nodeInfo.Node()
+	klog.V(4).Infof("ControllerScore: filter called for pod %s on node %s", pod.Name, node.Name)
 	ip := getInternalIP(node)
 	if ip == "" {
 		return framework.NewStatus(framework.Unschedulable, " no InternalIP")
@@ -116,7 +122,7 @@ func (cs *ControllerScore) Score(
 		return 0, framework.NewStatus(framework.Success)
 	}
 	node := nodeInfo.Node()
-
+	klog.V(4).Infof("ControllerScore: score called for pod %s on node %s", pod.Name, node.Name)
 	ip := getInternalIP(node)
 	if ip == "" {
 		return 0, framework.NewStatus(framework.Error, "no InternalIP")
