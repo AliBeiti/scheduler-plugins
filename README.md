@@ -117,3 +117,44 @@ You can find an [instruction how to build and run out-of-tree plugin here](doc/d
 ### Code of conduct
 
 Participation in the Kubernetes community is governed by the [Kubernetes Code of Conduct](code-of-conduct.md).
+
+
+UPDATE 12/06/2025
+
+1. A new custom plugin has been created called customScore. For using the plugin an image of the scheduler must be build. 
+```shell
+make build
+
+docker build \
+  --build-arg GO_BASE_IMAGE=golang:1.23 \
+  -f build/Dockerfile \
+  -t myregistry.io/kube-scheduler-controller-score:latest \
+  .
+```
+2. change the deployment file from manifests/controllerscore/deplyment according to the image.
+
+
+3. Bulding the scheduler's serviceaccount to cluster-admin:
+```shell
+kubectl create serviceaccount controller-score-scheduler -n kube-system
+
+
+kubectl create clusterrolebinding controller-score-scheduler-admin \
+  --clusterrole=cluster-admin \
+  --serviceaccount=kube-system:controller-score-scheduler
+```
+
+4. creating the configmap
+
+```shell
+kubectl -n kube-system create configmap controller-score-scheduler-config \
+  --from-file=scheduler-config.yaml=manifests/controllerscore/scheduler-config.yaml \
+  --dry-run=client -o yaml | kubectl apply -f -
+```
+5. deploy the custom scheduler
+
+```shell
+kubectl apply -f manifests/controllerscore/deployment.yaml
+```
+
+
